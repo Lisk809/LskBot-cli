@@ -1,0 +1,142 @@
+#!/usr/bin/env node
+var fs = require("fs")
+var conf = require('../lib/conf')
+var PATH = process.cwd()
+const colors = require("../lib/colors")
+const logger = require('../lib/logger')
+    .__logger
+var loop=1
+process.on('SIGINT', function () {
+             console.log(colors.yellow('✘   已退出LskBot-cli'));
+             process.exit();
+        });
+async function init() {
+        try{
+            
+        } catch(e){
+            console.log(colors.blue("安装LskBot......"))
+            chlid_process.exec('npm i lskbot -g')
+            console.log(colors.blue("\r安装完成!"))
+        }
+        var data = {}
+        const prompt = require('prompt');
+        // start the prompt
+        prompt.start();
+        var pwd = {
+            properties: {
+                password: {
+                    required: true,
+                    hidden: true,
+                    replace: '*'
+                }
+            }
+        };
+        var question = {
+            properties: {
+                qq: {
+                    required: true,
+                    message: colors.red(' ! 必须非空'),
+                    description: colors.blue('?') + '请输入机器人的QQ号'
+                
+                },
+                platform: {
+                    required: true,
+                    message: colors.red(' ! 必须非空'),
+                    description: colors.blue('?') + '请选择登录平台(ipad(5，推荐)，1	安卓手机2	aPad 3	安卓手表 4	MacOs'
+
+                },
+                login_mode: {
+                    required: true,
+                    message: colors.red(' ! 必须非空'),
+                    description: colors.blue(' ? ') + '请选择登录方式 (qrcode扫码登录，password密码登录)'
+                },
+                device_lock: {
+                    required: true,
+                    message: colors.red(' ! 必须非空'),
+                    description: colors.blue('?') + '请选择设备锁验证方式(SMS验证码，qrcode二维码)'
+
+                },
+                admins: {
+                    required: true,
+                    message: colors.red(' ! 必须非空'),
+                    description: colors.blue(' ? ') + '请输入机器人管理员，多个以英文逗号分割'
+
+
+                }
+            }
+        }
+        
+        prompt.get(question, (err, result1) => {
+            console.log(result1)
+            console.log(typeof result1!=='undefined')
+            if(typeof result1!=='undefined'){
+            if (result1.login_mode == 'password') {
+                prompt.get(pwd, (err, result2) => {
+                console.log(result2)
+                    var json=Object.assign(result1, result2)
+                    console.log(json)
+                    if(json.password=='undefined'){
+                        var obj={
+                            "bot":{
+                                "qq":json.qq,
+                                "login_mode": json.login_mode,
+                                "device_lock": json.device_lock,
+                                "admins": json.admins
+                     
+                                },
+                            "oicq":{
+                                "platform": json.platform,
+                                "level": "off"
+                            }
+                    
+                    }} else{
+                        var obj={
+                            "bot":{
+                                "qq":json.qq,
+                                "login_mode": json.login_mode,
+                                "device_lock": json.device_lock,
+                                "admins": json.admins
+                     
+                                },
+                            "oicq":{
+                                "platform": json.platform,
+                                "level": "off"
+                            }
+                    
+                    }
+                    
+                    
+                    
+                    }
+                    fs.writeFile(PATH + '/bot.json', JSON.stringify(obj), (err) => {
+                        if (err) {
+                            console.log(err)
+                        }
+                    })
+
+                })
+            }
+            }
+        })
+
+
+    }
+
+
+
+if(process.argv[2]=='init'){
+if(process.argv[3]=='undefined'){
+fs.exists(PATH + "/bot.json", async result => {
+    if (result == true) {
+        logger.info("bot.json文件已存在，使用--cover参数来重新生成")
+
+    } else {
+        init()
+    }
+
+})
+} else{
+    init()
+
+}
+}
